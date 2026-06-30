@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하루담 — 나의 일상 건강 코치</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Pretendard:wght@400;500;600;700&display=swap');
+
+  :root{
+    --sky-top: #aee2f6;
+    --sky-mid: #cdeefa;
+    --sky-bot: #eaf8fd;
+    --panel: #ffffff;
+    --panel-soft: #f3fbff;
+    --line: #d6ecf6;
+    --ink: #1b3a4b;
+    --ink-dim: #5d7e8c;
+    --sun: #ffd166;
+    --sun-dim: #ffb74d;
+    --coral: #ff8c69;
+    --mint: #3eb6a0;
+    --cloud: #ffffff;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  body{
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-bot) 100%);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  .cloud{ position: fixed; background: var(--cloud); border-radius: 50%; opacity: 0.75; filter: blur(0.5px); z-index: 0; }
+  .cloud::before, .cloud::after{ content:''; position:absolute; background: var(--cloud); border-radius: 50%; }
+  .c1{ width: 90px; height: 34px; top: 8%; left: 6%; }
+  .c1::before{ width: 50px; height: 50px; top: -22px; left: 10px; }
+  .c1::after{ width: 36px; height: 36px; top: -14px; left: 50px; }
+  .c2{ width: 70px; height: 26px; top: 22%; right: 10%; }
+  .c2::before{ width: 38px; height: 38px; top: -16px; left: 8px; }
+  .c2::after{ width: 28px; height: 28px; top: -10px; left: 38px; }
+  .c3{ width: 60px; height: 22px; top: 60%; left: 3%; opacity:0.5; }
+  .c3::before{ width: 32px; height: 32px; top: -14px; left: 6px; }
+
+  .layout{
+    max-width: 1180px; margin: 0 auto; position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1fr 360px; gap: 28px; align-items: start;
+  }
+
+  .main{ min-width: 0; }
+
+  .hero{ margin-bottom: 36px; position: relative; }
+  .hero .eyebrow{
+    font-size: 13px; letter-spacing: 0.18em; color: var(--mint);
+    text-transform: uppercase; margin-bottom: 14px; font-weight: 700;
+  }
+  .hero h1{
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(30px, 5vw, 44px);
+    font-weight: 700; line-height: 1.3; color: var(--ink);
+  }
+  .hero h1 em{ font-style: normal; color: var(--coral); }
+  .hero p{ margin-top: 14px; color: var(--ink-dim); font-size: 15px; line-height: 1.65; max-width: 520px; }
+
+  .datestrip{ display:flex; gap:8px; margin-bottom: 24px; overflow-x:auto; padding-bottom: 4px; }
+  .datechip{
+    flex: 0 0 auto; padding: 10px 14px; border-radius: 12px; background: var(--panel);
+    border: 1px solid var(--line); font-size: 13px; color: var(--ink-dim); cursor: pointer;
+    text-align:center; min-width: 56px; transition: all .15s;
+  }
+  .datechip.active{ background: var(--coral); color: #fff; border-color: var(--coral); font-weight:700; }
+  .datechip .d{ font-size: 16px; font-weight: 700; display:block; margin-top:2px; }
+
+  .card{
+    background: var(--panel); border: 1px solid var(--line); border-radius: 20px;
+    padding: 26px 24px; margin-bottom: 22px; box-shadow: 0 8px 28px rgba(67,140,170,0.10);
+  }
+  .card h2{
+    font-family:'Noto Serif KR', serif; font-size: 18px; font-weight:600; margin-bottom: 18px;
+    display:flex; align-items:center; gap:8px; color: var(--ink);
+  }
+  .card h2 .tag{ font-size:11px; background:var(--panel-soft); padding:3px 8px; border-radius:6px; color: var(--mint); font-family:'Pretendard'; font-weight:700;}
+  .card .sub{ font-size: 12.5px; color: var(--ink-dim); margin-top: -10px; margin-bottom: 16px; }
+
+  /* item selector */
+  .itemgrid{ display:flex; flex-wrap:wrap; gap:9px; }
+  .itemchip{
+    padding: 9px 14px; border-radius: 12px; background: var(--panel-soft); border:1px solid var(--line);
+    font-size: 13px; color: var(--ink-dim); cursor:pointer; transition: all .15s; user-select:none;
+    display:flex; align-items:center; gap:6px;
+  }
+  .itemchip.active{ background: var(--ink); border-color: var(--ink); color:#fff; font-weight:700; }
+  .itemchip .ic{ font-size:15px; }
+
+  .metrics{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .metric{ background: var(--panel-soft); border:1px solid var(--line); border-radius:14px; padding:16px; }
+  .metric.full{ grid-column: 1 / -1; }
+  .metric label{ font-size:13px; color: var(--ink-dim); display:flex; justify-content:space-between; margin-bottom:10px;}
+  .metric label .val{ color: var(--coral); font-weight:700; }
+  .metric input[type=range]{ width:100%; accent-color: var(--coral); }
+  .metric input[type=number], .metric input[type=text]{
+    width:100%; background: var(--panel); border:1px solid var(--line); border-radius: 10px;
+    color: var(--ink); padding: 10px 12px; font-family:'Pretendard'; font-size: 13.5px;
+  }
+  .metric input::placeholder{ color: #9bb3bd; }
+
+  .exertags{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .exertag{
+    padding: 7px 13px; border-radius: 999px; background: var(--panel); border:1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-dim); cursor:pointer; transition: all .15s; user-select:none;
+  }
+  .exertag.active{ background: var(--mint); border-color: var(--mint); color:#fff; font-weight:700; }
+
+  .choicerow{ display:flex; gap:8px; margin-top:6px; }
+  .choicebtn{
+    flex:1; padding:10px 0; border-radius:10px; background: var(--panel); border:1px solid var(--line);
+    color: var(--ink-dim); cursor:pointer; font-size:13px; font-weight:600; transition: all .15s; text-align:center;
+  }
+  .choicebtn.active{ background: var(--mint); border-color: var(--mint); color:#fff; }
+
+  .itemnote{
+    width:100%; background: var(--panel); border:1px solid var(--line); border-radius: 10px;
+    color: var(--ink); padding: 8px 11px; font-family:'Pretendard'; font-size: 12.5px;
+    margin-top: 10px;
+  }
+  .itemnote::placeholder{ color: #9bb3bd; }
+
+  .moodrow{ display:flex; gap:8px; margin-top:6px; }
+  .moodbtn{
+    flex:1; padding:10px 0; border-radius:10px; background: var(--panel-soft); border:1px solid var(--line);
+    color: var(--ink-dim); cursor:pointer; font-size:20px; transition: all .15s;
+  }
+  .moodbtn.active{ background: var(--mint); border-color: var(--mint); transform: scale(1.05); }
+
+  textarea{
+    width:100%; background: var(--panel-soft); border:1px solid var(--line); border-radius: 12px;
+    color: var(--ink); padding: 12px 14px; font-family:'Pretendard'; font-size: 14px; resize: vertical;
+    min-height: 60px; margin-top: 14px;
+  }
+  textarea::placeholder{ color: #9bb3bd; }
+
+  .submitbtn{
+    margin-top: 20px; width:100%; padding: 15px; border-radius: 14px; border:none;
+    background: linear-gradient(135deg, var(--coral), var(--sun-dim)); color:#fff;
+    font-weight:700; font-size:15px; cursor:pointer; transition: opacity .15s;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow: 0 6px 18px rgba(255,140,105,0.35);
+  }
+  .submitbtn:hover{ opacity:0.92; }
+  .submitbtn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .spinner{ width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,0.35); border-top-color:#fff; animation: spin .7s linear infinite; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .weekly h2{ font-family:'Noto Serif KR', serif; font-size: 18px; margin-bottom: 4px; color: var(--ink); }
+  .weekly .monthlabel{ font-size: 12.5px; color: var(--ink-dim); margin-bottom: 16px; }
+
+  .weekly-body{ display:flex; flex-direction: column; gap: 18px; align-items: stretch; }
+  .weekly-body .calwrap{ width: 100%; }
+
+  .summary{
+    width: 100%; background: var(--panel-soft); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px 16px; display:flex; flex-direction:column; gap: 12px;
+  }
+  .summary .srow{ display:flex; justify-content:space-between; align-items:baseline; }
+  .summary .slabel{ font-size: 12px; color: var(--ink-dim); }
+  .summary .sval{ font-size: 17px; font-weight: 700; color: var(--ink); }
+  .summary .sval.accent{ color: var(--coral); }
+  .summary .divider{ border-top: 1px dashed var(--line); margin: 2px 0; }
+  .summary .smoodrow{ display:flex; gap:6px; font-size: 16px; }
+  .summary .smoodrow .smood{ opacity: 0.25; }
+  .summary .smoodrow .smood.top{ opacity: 1; }
+  .summary .stitle{ font-size: 12.5px; font-weight:700; color: var(--ink); margin-bottom: -4px; }
+
+  .calendar{ display:grid; grid-template-columns: repeat(7, 1fr); gap: 4px; width: 100%; max-width: 380px; min-width: 0; }
+  .calendar .wd{ text-align:center; font-size: 10.5px; color: var(--ink-dim); font-weight:700; padding-bottom: 2px; }
+  .daycell{
+    aspect-ratio: 1; border-radius: 8px; background: transparent; border: none;
+    display:flex; align-items:center; justify-content:center; position: relative;
+  }
+  .daycell.empty{ background: transparent; border: none; }
+  .daycell.today{ background: var(--panel-soft); border-radius: 50%; }
+  .daycell .dnum{ font-size: 9px; color: var(--ink-dim); opacity: 0.55; }
+  .daycell .demoji{ font-size: 18px; line-height: 1; }
+  .daycell.recorded{ background: transparent; box-shadow: none; }
+  .daycell .dscore{ width:9px; height:9px; border-radius:50%; }
+
+  .calendar-legend{ display:flex; gap:14px; flex-wrap:wrap; margin-top: 16px; font-size: 12px; color: var(--ink-dim); }
+  .calendar-legend span{ display:inline-flex; align-items:center; gap:5px; }
+
+  .empty{ text-align:center; padding: 30px 10px; color: var(--ink-dim); font-size: 14px; }
+
+  .footer-note{
+    text-align:center; margin-top: 30px; font-size: 12.5px; color: #7fa0ad; line-height:1.7;
+  }
+
+  .agent-panel{
+    position: sticky; top: 28px;
+    background: linear-gradient(180deg, #ffffff, #f3fbff);
+    border: 1px solid var(--line); border-radius: 22px;
+    padding: 24px 20px 20px;
+    box-shadow: 0 12px 34px rgba(67,140,170,0.14);
+    display: flex; flex-direction: column;
+    max-height: calc(100vh - 56px);
+  }
+
+  .agent-head{ text-align: center; margin-bottom: 14px; }
+  .agent-avatar{ width: 96px; height: 96px; margin: 0 auto 12px; position: relative; }
+  .agent-avatar .body{
+    width: 100%; height: 100%; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff7e8, var(--sun) 60%, var(--sun-dim));
+    box-shadow: 0 8px 22px rgba(255,183,77,0.45);
+    display:flex; align-items:center; justify-content:center;
+    animation: floaty 3.4s ease-in-out infinite;
+  }
+  @keyframes floaty{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } }
+  .agent-avatar .face{ font-size: 40px; }
+  .agent-avatar .ring{
+    position:absolute; inset:-6px; border-radius:50%; border: 2px dashed var(--mint); opacity: 0.5;
+    animation: spinring 14s linear infinite;
+  }
+  @keyframes spinring{ to{ transform: rotate(360deg); } }
+  .agent-name{ font-family:'Noto Serif KR', serif; font-weight: 700; font-size: 17px; color: var(--ink); }
+  .agent-status{ font-size: 12px; color: var(--mint); font-weight: 600; margin-top: 2px; display:flex; align-items:center; justify-content:center; gap:5px; }
+  .agent-status .dot{ width:6px; height:6px; border-radius:50%; background: var(--mint); }
+  .agent-status .dot.thinking{ background: var(--coral); animation: pulse 1s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  .agent-feed{ flex: 1; overflow-y: auto; margin-top: 16px; padding-right: 2px; display: flex; flex-direction: column; gap: 12px; }
+  .agent-feed::-webkit-scrollbar{ width: 5px; }
+  .agent-feed::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 4px; }
+
+  .bubble{
+    background: var(--panel-soft); border: 1px solid var(--line); border-radius: 14px 14px 14px 4px;
+    padding: 13px 14px; font-size: 13.5px; line-height: 1.65; color: var(--ink);
+    animation: rise .35s ease;
+  }
+  @keyframes rise{ from{ opacity:0; transform: translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  .bubble .suggest-line{
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line);
+    font-size: 12.5px; color: var(--coral); font-weight: 700;
+  }
+  .bubble.system{ background: transparent; border: none; text-align:center; color: var(--ink-dim); font-size: 12.5px; padding: 4px 0; }
+
+  .typing{
+    display:flex; gap:4px; padding: 14px; background: var(--panel-soft); border-radius: 14px 14px 14px 4px;
+    border: 1px solid var(--line); width: fit-content;
+  }
+  .typing span{ width:6px; height:6px; border-radius:50%; background: var(--ink-dim); animation: tbounce 1.2s infinite; }
+  .typing span:nth-child(2){ animation-delay: .15s; }
+  .typing span:nth-child(3){ animation-delay: .3s; }
+  @keyframes tbounce{ 0%,60%,100%{ transform: translateY(0); opacity:.5;} 30%{ transform: translateY(-4px); opacity:1; } }
+
+  /* ===== Weekly goals ===== */
+  .goalgrid{ display:flex; flex-direction:column; gap:12px; }
+  .goalrow{ background: var(--panel-soft); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
+  .goalrow .grtop{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; }
+  .goalrow .grlabel{ font-size:13.5px; font-weight:600; color: var(--ink); display:flex; align-items:center; gap:6px; }
+  .goalrow .grinput{ display:flex; align-items:center; gap:6px; }
+  .goalrow input[type=number]{
+    width:64px; background: var(--panel); border:1px solid var(--line); border-radius:8px;
+    color: var(--ink); padding:6px 8px; font-family:'Pretendard'; font-size:13px; text-align:center;
+  }
+  .goalrow .grunit{ font-size:12px; color: var(--ink-dim); }
+  .goalbar-track{ width:100%; height:9px; border-radius:6px; background: var(--panel); border:1px solid var(--line); overflow:hidden; }
+  .goalbar-fill{ height:100%; border-radius:6px; background: linear-gradient(90deg, var(--mint), #69cdb9); transition: width .4s ease; }
+  .goalbar-fill.behind{ background: linear-gradient(90deg, var(--coral), var(--sun-dim)); }
+  .goalrow .grprogress{ display:flex; justify-content:space-between; font-size:11.5px; color: var(--ink-dim); margin-top:6px; }
+  .goalempty{ text-align:center; padding: 18px 10px; color: var(--ink-dim); font-size: 13px; }
+
+  /* ===== Alert banner ===== */
+  .alert-banner{
+    display:none; flex-direction:column; gap:8px; margin-bottom: 22px;
+    background: linear-gradient(135deg, #fff1ec, #fff8e9); border:1px solid #ffd0bd;
+    border-radius: 16px; padding: 16px 18px; box-shadow: 0 6px 18px rgba(255,140,105,0.15);
+  }
+  .alert-banner.show{ display:flex; animation: rise .35s ease; }
+  .alert-banner .abhead{ display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; color:#c2522f; }
+  .alert-banner .abitem{ font-size:13px; color: var(--ink); line-height:1.55; padding-left:24px; position:relative; }
+  .alert-banner .abitem::before{ content:'•'; position:absolute; left:8px; color:#c2522f; }
+  .alert-banner .abclose{
+    align-self:flex-end; font-size:12px; color: var(--ink-dim); cursor:pointer; background:none; border:none;
+    text-decoration:underline; padding:0; margin-top:-4px;
+  }
+  .notify-toggle{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px; color: var(--ink-dim);
+    cursor:pointer; margin-top:8px; user-select:none;
+  }
+  .notify-toggle input{ accent-color: var(--mint); }
+
+  @media (max-width: 920px){
+    .layout{ grid-template-columns: 1fr; }
+    .agent-panel{ position: static; max-height: none; order: -1; }
+    .agent-feed{ max-height: 220px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<div class="cloud c3"></div>
+
+<div class="layout">
+
+  <div class="main">
+    <div class="hero">
+      <div class="eyebrow">Daily Health & Habit Agent</div>
+      <h1>오늘 하루,<br><em>가볍게</em> 기록해보세요</h1>
+      <p>나에게 중요한 항목만 골라 1분 체크인하면, 오른쪽의 AI 코치가 오늘의 패턴을 읽고 짧은 피드백과 내일을 위한 제안을 건네드려요.</p>
+    </div>
+
+    <div class="datestrip" id="datestrip"></div>
+
+    <div class="alert-banner" id="alertBanner">
+      <div class="abhead">⚠️ 코치의 알림</div>
+      <div id="alertList"></div>
+      <button class="abclose" id="alertClose">닫기</button>
+    </div>
+
+
+    <div class="card">
+      <h2>오늘 기록할 항목 고르기</h2>
+      <div class="sub">사람마다 중요하게 여기는 부분이 다르니까, 나에게 필요한 항목만 선택하세요.</div>
+      <div class="itemgrid" id="itemgrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>주간 목표 설정 <span class="tag">Weekly Goals</span></h2>
+      <div class="sub">선택한 항목에 대해 이번 주 목표를 정해두면, 진행 상황을 추적하고 못 채울 것 같을 때 알려드려요.</div>
+      <div class="goalgrid" id="goalgrid"></div>
+      <label class="notify-toggle"><input type="checkbox" id="notifyToggle">브라우저 알림으로도 받기</label>
+    </div>
+
+    <div class="card">
+      <h2>오늘의 체크인 <span class="tag" id="todayLabel"></span></h2>
+      <div class="metrics" id="metricsContainer"></div>
+      <textarea id="note" placeholder="오늘 있었던 일이나 컨디션을 짧게 적어보세요 (선택)"></textarea>
+      <button class="submitbtn" id="submitBtn">
+        <span id="btnText">✦ AI 코치에게 피드백 받기</span>
+      </button>
+    </div>
+
+    <div class="card weekly">
+      <h2>최근 기록</h2>
+      <div class="monthlabel" id="monthLabel"></div>
+      <div class="weekly-body">
+        <div class="calwrap">
+          <div class="calendar" id="calendar"></div>
+          <div class="calendar-legend">
+            <span>😣 힘듦</span><span>😐 그저그럼</span><span>🙂 괜찮음</span><span>😄 좋음</span>
+            <span><span class="dscore" style="display:inline-block;background:var(--coral);width:10px;height:10px;border-radius:50%;"></span>기분 미기록(점수 기반)</span>
+          </div>
+        </div>
+        <div class="summary" id="summary"></div>
+      </div>
+      <div class="empty" id="emptyMsg" style="display:none;">아직 기록이 없어요. 오늘 첫 체크인을 해보세요!</div>
+    </div>
+
+    <div class="footer-note">하루담은 의학적 진단을 대체하지 않습니다. 건강에 큰 변화나 우려가 있다면 전문가와 상담하세요.<br>이 데모는 세션 내 기록만 저장되며, 새로고침 시 초기화됩니다.</div>
+  </div>
+
+  <aside class="agent-panel">
+    <div class="agent-head">
+      <div class="agent-avatar">
+        <div class="ring"></div>
+        <div class="body"><span class="face">🌤️</span></div>
+      </div>
+      <div class="agent-name">하루 코치</div>
+      <div class="agent-status" id="agentStatus"><span class="dot"></span>대기 중</div>
+    </div>
+    <div class="agent-feed" id="agentFeed">
+      <div class="bubble system">체크인을 마치면 제가 바로 살펴볼게요 ☁️</div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  // ===== Item catalog =====
+  const ITEM_DEFS = {
+    water:      { icon:'💧', label:'물 섭취량',      type:'slider', unit:'잔',  min:0, max:10, step:1,  default:4 },
+    sleep:      { icon:'😴', label:'수면 시간',      type:'slider', unit:'시간', min:0, max:12, step:1,  default:7 },
+    cardio:     { icon:'🏃', label:'유산소 운동',    type:'slider', unit:'분',  min:0, max:120, step:5, default:0 },
+    strength:   { icon:'🏋️', label:'무산소 운동',    type:'slider_detail', unit:'분', min:0, max:120, step:5, default:0,
+                  tagOptions:['스쿼트','데드리프트','벤치프레스','풀업','플랭크','런지'] },
+    mood:       { icon:'🙂', label:'오늘 기분',      type:'mood' },
+    diet:       { icon:'🍽️', label:'식사 관리',      type:'choice', options:['잘 챙김','보통','부실'] },
+    meditation: { icon:'🧘', label:'명상 · 마음챙김', type:'slider', unit:'분',  min:0, max:60, step:5,  default:0 },
+    reading:    { icon:'📚', label:'독서 · 자기계발', type:'slider', unit:'분',  min:0, max:120, step:5, default:0 },
+    screentime: { icon:'📱', label:'스크린 타임',    type:'slider', unit:'시간', min:0, max:12, step:1,  default:4 },
+    weight:     { icon:'⚖️', label:'체중 기록',      type:'number', unit:'kg', step:0.1, default:'' },
+  };
+  const DEFAULT_SELECTED = ['water','sleep','cardio','strength','mood'];
+  let selectedItems = new Set(DEFAULT_SELECTED);
+  let mood = "괜찮음";
+  let dietChoice = "보통";
+  let history = [];
+
+  // ===== Weekly goals =====
+  // mode: 'cumulative' = goal is a weekly total (sum of daily values vs goal)
+  //       'avg_min'     = goal is a minimum, want daily average >= goal
+  //       'avg_max'     = goal is a maximum (ceiling), want daily average <= goal
+  //       'count_min'   = goal is "이만큼의 일수는 OOO이길" (e.g. 식사 잘 챙김 며칠)
+  const GOAL_DEFS = {
+    water:      { mode:'avg_min', unit:'잔/일',  default:6 },
+    sleep:      { mode:'avg_min', unit:'시간/일', default:7 },
+    cardio:     { mode:'cumulative', unit:'분/주', default:90 },
+    strength:   { mode:'cumulative', unit:'분/주', default:60 },
+    meditation: { mode:'cumulative', unit:'분/주', default:70 },
+    reading:    { mode:'cumulative', unit:'분/주', default:120 },
+    screentime: { mode:'avg_max', unit:'시간/일 이하', default:4 },
+    diet:       { mode:'count_min', unit:'일/주 "잘 챙김"', default:4 },
+  };
+  let weeklyGoals = {};
+  Object.keys(GOAL_DEFS).forEach(id => weeklyGoals[id] = GOAL_DEFS[id].default);
+
+  // ===== Persistence (localStorage) =====
+  const STORAGE_KEY = 'harudam_state_v1';
+  function saveState(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        history,
+        weeklyGoals,
+        selectedItems: Array.from(selectedItems)
+      }));
+    }catch(e){ console.warn('저장 실패:', e); }
+  }
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      const saved = JSON.parse(raw);
+      if(Array.isArray(saved.history)) history = saved.history;
+      if(saved.weeklyGoals && typeof saved.weeklyGoals === 'object'){
+        Object.keys(saved.weeklyGoals).forEach(id => {
+          if(id in GOAL_DEFS) weeklyGoals[id] = saved.weeklyGoals[id];
+        });
+      }
+      if(Array.isArray(saved.selectedItems) && saved.selectedItems.length > 0){
+        selectedItems = new Set(saved.selectedItems.filter(id => id in ITEM_DEFS));
+      }
+    }catch(e){ console.warn('불러오기 실패:', e); }
+  }
+  loadState();
+
+  // ===== Unhealthy thresholds for daily alerts =====
+  const UNHEALTHY_RULES = [
+    { id:'sleep',      check: e => 'sleep' in e && e.sleep < 4,  msg: e => `오늘 수면이 ${e.sleep}시간으로 많이 부족해요. 며칠 더 이렇게 이어지면 컨디션에 영향이 커요.` },
+    { id:'screentime', check: e => 'screentime' in e && e.screentime > 10, msg: e => `오늘 스크린타임이 ${e.screentime}시간으로 꽤 길었어요. 잠깐이라도 화면에서 눈을 떼는 시간을 가져보세요.` },
+    { id:'water',      check: e => 'water' in e && e.water <= 1, msg: e => `오늘 물을 거의 못 드셨어요 (${e.water}잔). 수분 보충 신경 써주세요.` },
+    { id:'diet',       check: e => e.diet === '부실', msg: () => `오늘 식사가 부실했다고 기록하셨어요. 다음 끼니는 든든하게 챙겨보세요.` },
+  ];
+
+  // ===== Item selector chips =====
+  const itemgrid = document.getElementById('itemgrid');
+  Object.entries(ITEM_DEFS).forEach(([id, def]) => {
+    const chip = document.createElement('div');
+    chip.className = 'itemchip' + (selectedItems.has(id) ? ' active' : '');
+    chip.dataset.id = id;
+    chip.innerHTML = `<span class="ic">${def.icon}</span>${def.label}`;
+    chip.onclick = () => {
+      if(selectedItems.has(id)){
+        if(selectedItems.size === 1){ return; } // keep at least 1 item
+        selectedItems.delete(id);
+        chip.classList.remove('active');
+      } else {
+        selectedItems.add(id);
+        chip.classList.add('active');
+      }
+      renderMetrics();
+      renderGoals();
+      saveState();
+    };
+    itemgrid.appendChild(chip);
+  });
+
+  // ===== Render metrics dynamically =====
+  const metricsContainer = document.getElementById('metricsContainer');
+
+  function renderMetrics(){
+    metricsContainer.innerHTML = '';
+    selectedItems.forEach(id => {
+      const def = ITEM_DEFS[id];
+      const wrap = document.createElement('div');
+      wrap.className = 'metric' + (def.type === 'slider_detail' || def.type === 'mood' || def.type === 'choice' ? '' : '');
+
+      if(def.type === 'slider'){
+        wrap.innerHTML = `
+          <label>${def.icon} ${def.label} <span class="val"><span id="val_${id}">${def.default}</span>${def.unit}</span></label>
+          <input type="range" id="inp_${id}" min="${def.min}" max="${def.max}" step="${def.step}" value="${def.default}">
+          <input type="text" class="itemnote" id="note_${id}" placeholder="${def.label} 관련 메모 (선택)">`;
+        metricsContainer.appendChild(wrap);
+        const slider = wrap.querySelector(`#inp_${id}`);
+        slider.oninput = () => wrap.querySelector(`#val_${id}`).textContent = slider.value;
+
+      } else if(def.type === 'slider_detail'){
+        wrap.className += ' full';
+        wrap.innerHTML = `
+          <label>${def.icon} ${def.label} <span class="val"><span id="val_${id}">${def.default}</span>${def.unit}</span></label>
+          <input type="range" id="inp_${id}" min="${def.min}" max="${def.max}" step="${def.step}" value="${def.default}">
+          <div id="detailWrap_${id}" style="display:none; margin-top:12px;">
+            <div class="exertags" id="tags_${id}">
+              ${def.tagOptions.map(t => `<span class="exertag" data-ex="${t}">${t}</span>`).join('')}
+            </div>
+            <input type="text" id="detailInput_${id}" placeholder="예: 스쿼트 3세트, 데드리프트 3세트 (직접 입력 가능)">
+          </div>`;
+        metricsContainer.appendChild(wrap);
+        const slider = wrap.querySelector(`#inp_${id}`);
+        const detailWrap = wrap.querySelector(`#detailWrap_${id}`);
+        const detailInput = wrap.querySelector(`#detailInput_${id}`);
+        slider.oninput = () => {
+          wrap.querySelector(`#val_${id}`).textContent = slider.value;
+          detailWrap.style.display = Number(slider.value) > 0 ? 'block' : 'none';
+        };
+        wrap.querySelectorAll('.exertag').forEach(tag => {
+          tag.onclick = () => {
+            tag.classList.toggle('active');
+            const selected = Array.from(wrap.querySelectorAll('.exertag.active')).map(t => t.dataset.ex);
+            const existing = detailInput.value.trim();
+            const manualPart = existing.split(',').map(s=>s.trim()).filter(s => s && !def.tagOptions.includes(s));
+            detailInput.value = [...selected, ...manualPart].join(', ');
+          };
+        });
+
+      } else if(def.type === 'mood'){
+        wrap.className += ' full';
+        wrap.innerHTML = `
+          <label>${def.icon} ${def.label}</label>
+          <div class="moodrow" id="moodrow_${id}">
+            <div class="moodbtn" data-mood="힘듦">😣</div>
+            <div class="moodbtn" data-mood="그저그럼">😐</div>
+            <div class="moodbtn active" data-mood="괜찮음">🙂</div>
+            <div class="moodbtn" data-mood="좋음">😄</div>
+          </div>
+          <input type="text" class="itemnote" id="note_${id}" placeholder="기분 관련 메모 (선택, 예: 오늘 발표가 있어서 긴장됨)">`;
+        metricsContainer.appendChild(wrap);
+        wrap.querySelectorAll('.moodbtn').forEach(btn => {
+          btn.onclick = () => {
+            wrap.querySelectorAll('.moodbtn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            mood = btn.dataset.mood;
+          };
+        });
+
+      } else if(def.type === 'choice'){
+        wrap.className += ' full';
+        wrap.innerHTML = `
+          <label>${def.icon} ${def.label}</label>
+          <div class="choicerow" id="choicerow_${id}">
+            ${def.options.map((o,i) => `<div class="choicebtn${i===1?' active':''}" data-v="${o}">${o}</div>`).join('')}
+          </div>
+          <input type="text" class="itemnote" id="note_${id}" placeholder="식사 관련 메모 (선택, 예: 야식 먹음)">`;
+        metricsContainer.appendChild(wrap);
+        wrap.querySelectorAll('.choicebtn').forEach(btn => {
+          btn.onclick = () => {
+            wrap.querySelectorAll('.choicebtn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            dietChoice = btn.dataset.v;
+          };
+        });
+
+      } else if(def.type === 'number'){
+        wrap.innerHTML = `
+          <label>${def.icon} ${def.label} <span class="val">${def.unit}</span></label>
+          <input type="number" id="inp_${id}" step="${def.step}" placeholder="예: 65.5">
+          <input type="text" class="itemnote" id="note_${id}" placeholder="${def.label} 관련 메모 (선택)">`;
+        metricsContainer.appendChild(wrap);
+      }
+    });
+  }
+  renderMetrics();
+
+  // ===== Weekly goal progress computation =====
+  function startOfWeekG(d){
+    const r = new Date(d);
+    r.setDate(r.getDate() - r.getDay());
+    r.setHours(0,0,0,0);
+    return r;
+  }
+  function computeWeekProgress(id){
+    const def = GOAL_DEFS[id];
+    if(!def) return null;
+    const today = new Date();
+    const weekStart = startOfWeekG(today);
+    const weekEntries = history.filter(h => new Date(h.date) >= weekStart);
+    const dayIndex = today.getDay() + 1; // 1(Sun)~7(Sat), days elapsed including today
+    const goal = weeklyGoals[id];
+
+    if(def.mode === 'cumulative'){
+      const actual = weekEntries.reduce((s,h)=> s + (h[id]||0), 0);
+      return { actual, goal, pct: goal>0 ? Math.min(100, Math.round(actual/goal*100)) : 0,
+        expectedSoFar: goal * dayIndex/7, label: `${actual} / ${goal} ${def.unit}` };
+    }
+    if(def.mode === 'avg_min'){
+      const vals = weekEntries.filter(h => id in h).map(h=>h[id]);
+      const avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+      return { actual: avg, goal, pct: goal>0 ? Math.min(100, Math.round(avg/goal*100)) : 0,
+        expectedSoFar: goal, label: `평균 ${avg.toFixed(1)} / 목표 ${goal} ${def.unit}` };
+    }
+    if(def.mode === 'avg_max'){
+      const vals = weekEntries.filter(h => id in h).map(h=>h[id]);
+      const avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+      return { actual: avg, goal, pct: avg<=goal ? 100 : Math.max(0, 100 - Math.round((avg-goal)/goal*100)),
+        expectedSoFar: goal, label: `평균 ${avg.toFixed(1)} / 상한 ${goal} ${def.unit}`, lowerIsBetter:true };
+    }
+    if(def.mode === 'count_min'){
+      const count = weekEntries.filter(h => h.diet === '잘 챙김').length;
+      return { actual: count, goal, pct: goal>0 ? Math.min(100, Math.round(count/goal*100)) : 0,
+        expectedSoFar: goal * dayIndex/7, label: `${count} / ${goal} ${def.unit}` };
+    }
+    return null;
+  }
+
+  function renderGoals(){
+    const goalgrid = document.getElementById('goalgrid');
+    goalgrid.innerHTML = '';
+    const goalItems = Array.from(selectedItems).filter(id => GOAL_DEFS[id]);
+    if(goalItems.length === 0){
+      goalgrid.innerHTML = '<div class="goalempty">목표를 설정할 수 있는 항목을 위에서 선택해보세요 (물, 수면, 운동, 명상, 독서, 스크린타임, 식사 등).</div>';
+      return;
+    }
+    goalItems.forEach(id => {
+      const def = ITEM_DEFS[id];
+      const gdef = GOAL_DEFS[id];
+      const prog = computeWeekProgress(id);
+      const row = document.createElement('div');
+      row.className = 'goalrow';
+      const behind = prog && !prog.lowerIsBetter && prog.actual < prog.expectedSoFar * 0.7;
+      row.innerHTML = `
+        <div class="grtop">
+          <span class="grlabel">${def.icon} ${id==='diet' ? '식사' : def.label}</span>
+          <span class="grinput">
+            <input type="number" id="goal_${id}" min="0" step="${gdef.mode==='avg_min'||gdef.mode==='avg_max' ? '0.5':'1'}" value="${weeklyGoals[id]}">
+            <span class="grunit">${gdef.unit}</span>
+          </span>
+        </div>
+        <div class="goalbar-track"><div class="goalbar-fill${behind?' behind':''}" style="width:${prog?prog.pct:0}%"></div></div>
+        <div class="grprogress"><span>${prog ? prog.label : '기록 시작 전'}</span><span>${prog ? prog.pct+'%' : ''}</span></div>
+      `;
+      goalgrid.appendChild(row);
+      row.querySelector(`#goal_${id}`).oninput = (e) => {
+        weeklyGoals[id] = Number(e.target.value) || 0;
+        renderGoals();
+        saveState();
+      };
+    });
+  }
+  renderGoals();
+
+  // ===== Date strip =====
+  const days = ['일','월','화','수','목','금','토'];
+  function buildDateStrip(){
+    const strip = document.getElementById('datestrip');
+    strip.innerHTML = '';
+    const today = new Date();
+    for(let i=6;i>=0;i--){
+      const d = new Date(today);
+      d.setDate(today.getDate()-i);
+      const chip = document.createElement('div');
+      chip.className = 'datechip' + (i===0 ? ' active' : '');
+      chip.innerHTML = `${days[d.getDay()]}<span class="d">${d.getDate()}</span>`;
+      strip.appendChild(chip);
+    }
+    document.getElementById('todayLabel').textContent =
+      `${today.getMonth()+1}월 ${today.getDate()}일 (${days[today.getDay()]})`;
+  }
+  buildDateStrip();
+
+  // ===== Calendar (mood-by-day view) =====
+  const MOOD_EMOJI = { '힘듦':'😣', '그저그럼':'😐', '괜찮음':'🙂', '좋음':'😄' };
+  function scoreColor(score){
+    if(score >= 8) return '#3eb6a0';
+    if(score >= 5) return '#ffb74d';
+    return '#ff8c69';
+  }
+
+  function renderCalendar(){
+    const calendar = document.getElementById('calendar');
+    const monthLabel = document.getElementById('monthLabel');
+    const emptyMsg = document.getElementById('emptyMsg');
+    calendar.innerHTML = '';
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    monthLabel.textContent = `${year}년 ${month+1}월`;
+
+    // map day-of-month -> latest entry recorded that day
+    const byDay = {};
+    history.forEach(h => {
+      const d = new Date(h.date);
+      if(d.getFullYear() === year && d.getMonth() === month){
+        byDay[d.getDate()] = h; // keep latest if multiple
+      }
+    });
+
+    if(history.length === 0){ emptyMsg.style.display = 'block'; } else { emptyMsg.style.display = 'none'; }
+
+    const weekdayLabels = ['일','월','화','수','목','금','토'];
+    weekdayLabels.forEach(w => {
+      const el = document.createElement('div');
+      el.className = 'wd';
+      el.textContent = w;
+      calendar.appendChild(el);
+    });
+
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+
+    for(let i=0; i<firstWeekday; i++){
+      const el = document.createElement('div');
+      el.className = 'daycell empty';
+      calendar.appendChild(el);
+    }
+
+    for(let day=1; day<=daysInMonth; day++){
+      const cell = document.createElement('div');
+      const isToday = day === today.getDate();
+      const entry = byDay[day];
+      cell.className = 'daycell' + (isToday ? ' today' : '') + (entry ? ' recorded' : '');
+      let inner;
+      if(entry){
+        if(entry.mood && MOOD_EMOJI[entry.mood]){
+          inner = `<span class="demoji">${MOOD_EMOJI[entry.mood]}</span>`;
+        } else {
+          inner = `<span class="dscore" style="background:${scoreColor(entry.score)}"></span>`;
+        }
+      } else {
+        inner = `<span class="dnum">${day}</span>`;
+      }
+      cell.innerHTML = inner;
+      calendar.appendChild(cell);
+    }
+  }
+  renderCalendar();
+
+  // ===== Week/Month summary panel =====
+  function startOfWeek(d){
+    const r = new Date(d);
+    r.setDate(r.getDate() - r.getDay());
+    r.setHours(0,0,0,0);
+    return r;
+  }
+
+  function renderSummary(){
+    const summary = document.getElementById('summary');
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const weekStart = startOfWeek(today);
+
+    const monthEntries = history.filter(h => {
+      const d = new Date(h.date);
+      return d.getFullYear() === year && d.getMonth() === month;
+    });
+    const weekEntries = monthEntries.filter(h => new Date(h.date) >= weekStart);
+
+    if(history.length === 0){
+      summary.innerHTML = `<div class="stitle">아직 통계가 없어요</div>
+        <div style="font-size:12.5px; color:var(--ink-dim); line-height:1.6;">체크인을 시작하면 이번 주·이번 달 패턴을 여기서 보여드릴게요.</div>`;
+      return;
+    }
+
+    const avg = arr => arr.length ? Math.round(arr.reduce((a,h)=>a+h.score,0) / arr.length) : 0;
+    const weekAvg = avg(weekEntries);
+    const monthAvg = avg(monthEntries);
+
+    let streak = 0;
+    for(let i=0;i<60;i++){
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const has = history.some(h => {
+        const hd = new Date(h.date);
+        return hd.getFullYear()===d.getFullYear() && hd.getMonth()===d.getMonth() && hd.getDate()===d.getDate();
+      });
+      if(has) streak++; else break;
+    }
+
+    const moodCounts = {};
+    monthEntries.forEach(h => { if(h.mood) moodCounts[h.mood] = (moodCounts[h.mood]||0)+1; });
+    const moodOrder = ['힘듦','그저그럼','괜찮음','좋음'];
+    const topMood = Object.keys(moodCounts).sort((a,b)=>moodCounts[b]-moodCounts[a])[0];
+
+    summary.innerHTML = `
+      <div class="srow"><span class="slabel">이번 주 평균 점수</span><span class="sval accent">${weekAvg}/10</span></div>
+      <div class="srow"><span class="slabel">이번 달 평균 점수</span><span class="sval">${monthAvg}/10</span></div>
+      <div class="divider"></div>
+      <div class="srow"><span class="slabel">이번 달 기록일</span><span class="sval">${monthEntries.length}일</span></div>
+      <div class="srow"><span class="slabel">연속 기록</span><span class="sval">${streak}일째</span></div>
+      ${topMood ? `
+      <div class="divider"></div>
+      <div class="stitle">이번 달 기분 분포</div>
+      <div class="smoodrow">
+        ${moodOrder.map(m => `<span class="smood${m===topMood?' top':''}">${MOOD_EMOJI[m]}</span>`).join('')}
+      </div>` : ''}
+    `;
+  }
+  renderSummary();
+
+  function computeScore(entry){
+    const parts = [];
+    if('water' in entry) parts.push(Math.min(entry.water,8)/8);
+    if('sleep' in entry) parts.push(Math.min(entry.sleep,8)/8);
+    if('cardio' in entry || 'strength' in entry){
+      const ex = (entry.cardio||0) + (entry.strength||0);
+      parts.push(Math.min(ex,60)/60);
+    }
+    if('mood' in entry){
+      const map = {'힘듦':0.2,'그저그럼':0.5,'괜찮음':0.7,'좋음':1};
+      parts.push(map[entry.mood] ?? 0.5);
+    }
+    if('diet' in entry){
+      const map = {'잘 챙김':1,'보통':0.6,'부실':0.2};
+      parts.push(map[entry.diet] ?? 0.6);
+    }
+    if('meditation' in entry) parts.push(Math.min(entry.meditation,30)/30);
+    if('reading' in entry) parts.push(Math.min(entry.reading,60)/60);
+    if('screentime' in entry) parts.push(Math.max(0, (8-entry.screentime))/8);
+    if(parts.length === 0) return 5;
+    const avg = parts.reduce((a,b)=>a+b,0) / parts.length;
+    return Math.round(avg*10);
+  }
+
+  // ===== Agent panel helpers =====
+  const agentFeed = document.getElementById('agentFeed');
+  const agentStatus = document.getElementById('agentStatus');
+
+  function setAgentStatus(state){
+    if(state === 'thinking'){
+      agentStatus.innerHTML = '<span class="dot thinking"></span>생각 중...';
+    } else if(state === 'error'){
+      agentStatus.innerHTML = '<span class="dot" style="background:#ff8c69"></span>다시 시도해주세요';
+    } else {
+      agentStatus.innerHTML = '<span class="dot"></span>대기 중';
+    }
+  }
+  function addTypingBubble(){
+    const el = document.createElement('div');
+    el.className = 'typing';
+    el.id = 'typingBubble';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    agentFeed.appendChild(el);
+    agentFeed.scrollTop = agentFeed.scrollHeight;
+  }
+  function removeTypingBubble(){
+    const el = document.getElementById('typingBubble');
+    if(el) el.remove();
+  }
+  function addAgentMessage(feedback, suggestion){
+    const el = document.createElement('div');
+    el.className = 'bubble';
+    el.innerHTML = feedback.replace(/</g,'&lt;') +
+      (suggestion ? `<div class="suggest-line">💡 ${suggestion.replace(/</g,'&lt;')}</div>` : '');
+    agentFeed.appendChild(el);
+    agentFeed.scrollTop = agentFeed.scrollHeight;
+  }
+
+  // ===== Gather today's entry from selected items =====
+  function gatherEntry(){
+    const entry = {};
+    selectedItems.forEach(id => {
+      const def = ITEM_DEFS[id];
+      if(def.type === 'slider'){
+        entry[id] = Number(document.getElementById(`inp_${id}`).value);
+        const n = document.getElementById(`note_${id}`);
+        if(n && n.value.trim()) entry[id+'Note'] = n.value.trim();
+      } else if(def.type === 'slider_detail'){
+        const val = Number(document.getElementById(`inp_${id}`).value);
+        entry[id] = val;
+        if(val > 0){
+          const detail = document.getElementById(`detailInput_${id}`).value.trim();
+          if(detail) entry[id+'Detail'] = detail;
+        }
+      } else if(def.type === 'mood'){
+        entry.mood = mood;
+        const n = document.getElementById(`note_${id}`);
+        if(n && n.value.trim()) entry.moodNote = n.value.trim();
+      } else if(def.type === 'choice'){
+        entry.diet = dietChoice;
+        const n = document.getElementById(`note_${id}`);
+        if(n && n.value.trim()) entry.dietNote = n.value.trim();
+      } else if(def.type === 'number'){
+        const raw = document.getElementById(`inp_${id}`).value;
+        if(raw !== '') entry[id] = Number(raw);
+        const n = document.getElementById(`note_${id}`);
+        if(n && n.value.trim()) entry[id+'Note'] = n.value.trim();
+      }
+    });
+    return entry;
+  }
+
+  function formatEntryLine(h){
+    const bits = [];
+    if('water' in h) bits.push(`물 ${h.water}잔${h.waterNote ? `[${h.waterNote}]` : ''}`);
+    if('sleep' in h) bits.push(`수면 ${h.sleep}시간${h.sleepNote ? `[${h.sleepNote}]` : ''}`);
+    if('cardio' in h) bits.push(`유산소 ${h.cardio}분${h.cardioNote ? `[${h.cardioNote}]` : ''}`);
+    if('strength' in h) bits.push(`무산소 ${h.strength}분${h.strengthDetail ? `(${h.strengthDetail})` : ''}`);
+    if('mood' in h) bits.push(`기분 ${h.mood}${h.moodNote ? `[${h.moodNote}]` : ''}`);
+    if('diet' in h) bits.push(`식사 ${h.diet}${h.dietNote ? `[${h.dietNote}]` : ''}`);
+    if('meditation' in h) bits.push(`명상 ${h.meditation}분${h.meditationNote ? `[${h.meditationNote}]` : ''}`);
+    if('reading' in h) bits.push(`독서 ${h.reading}분${h.readingNote ? `[${h.readingNote}]` : ''}`);
+    if('screentime' in h) bits.push(`스크린타임 ${h.screentime}시간${h.screentimeNote ? `[${h.screentimeNote}]` : ''}`);
+    if('weight' in h) bits.push(`체중 ${h.weight}kg${h.weightNote ? `[${h.weightNote}]` : ''}`);
+    return bits.join(', ');
+  }
+
+  // ===== Alerts: unhealthy days & off-track weekly goals =====
+  const alertBanner = document.getElementById('alertBanner');
+  const alertList = document.getElementById('alertList');
+  const notifyToggle = document.getElementById('notifyToggle');
+  document.getElementById('alertClose').onclick = () => alertBanner.classList.remove('show');
+
+  notifyToggle.onchange = () => {
+    if(notifyToggle.checked && 'Notification' in window && Notification.permission === 'default'){
+      Notification.requestPermission().then(p => { if(p !== 'granted') notifyToggle.checked = false; });
+    }
+  };
+
+  function sendBrowserNotification(title, body){
+    if(notifyToggle.checked && 'Notification' in window && Notification.permission === 'granted'){
+      try{ new Notification(title, { body, icon: undefined }); }catch(e){ /* ignore */ }
+    }
+  }
+
+  function checkAlerts(entry){
+    const msgs = [];
+
+    // 1) Immediate unhealthy-value checks for today's entry
+    UNHEALTHY_RULES.forEach(rule => {
+      if(rule.check(entry)) msgs.push(rule.msg(entry));
+    });
+
+    // 2) Weekly goal pace check (only for items the user selected & gave a goal to)
+    Array.from(selectedItems).filter(id => GOAL_DEFS[id]).forEach(id => {
+      const prog = computeWeekProgress(id);
+      if(!prog || prog.lowerIsBetter) return;
+      const today = new Date();
+      const dayIndex = today.getDay() + 1; // 1~7
+      if(dayIndex >= 3 && prog.actual < prog.expectedSoFar * 0.5){
+        const def = ITEM_DEFS[id];
+        msgs.push(`이번 주 "${def.label}" 목표 진행이 더뎌요 (현재 ${prog.label}). 페이스를 조금 올려볼까요?`);
+      }
+      if(dayIndex === 7 && prog.pct < 100){
+        const def = ITEM_DEFS[id];
+        msgs.push(`이번 주 "${def.label}" 목표를 아직 못 채웠어요 (${prog.label}). 오늘이 마지막 기회예요!`);
+      }
+    });
+
+    if(msgs.length > 0){
+      alertList.innerHTML = msgs.map(m => `<div class="abitem">${m.replace(/</g,'&lt;')}</div>`).join('');
+      alertBanner.classList.add('show');
+      sendBrowserNotification('하루담 코치 알림', msgs[0]);
+    } else {
+      alertBanner.classList.remove('show');
+    }
+  }
+
+
+  // ===== Local rule-based coach (no external API needed) =====
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  const OPENERS = [
+    "오늘 기록 잘 봤어요.", "오늘도 체크인해주셔서 좋아요.", "오늘 하루도 수고 많으셨어요.",
+    "기록 확인했어요!", "오늘 하루 잘 챙기셨네요."
+  ];
+  const CLOSERS = [
+    "내일도 이 페이스 그대로 가봐요.", "작은 습관들이 차곡차곡 쌓이고 있어요.",
+    "꾸준함이 제일 큰 무기예요, 잘하고 계세요.", "오늘 하루도 스스로를 잘 챙기셨어요.",
+    "이런 식으로 계속 기록해보면 패턴이 더 잘 보일 거예요."
+  ];
+
+  const ITEM_COMMENTS = {
+    water: v => v>=8 ? pick(["물을 충분히 드셨네요, 수분 보충 정말 잘하셨어요.","오늘 물 섭취량 훌륭해요!"])
+      : v>=4 ? pick(["물 섭취량 무난했어요.","물은 적당히 챙기셨네요."])
+      : pick(["물을 좀 더 챙겨 드시면 컨디션에 도움이 될 거예요.","오늘은 물 섭취가 조금 부족했어요."]),
+    sleep: v => v>=7 ? pick(["수면 시간이 충분했어요, 잘 쉬셨겠어요.","오늘은 잠을 푹 주무셨네요."])
+      : v>=5 ? pick(["수면이 살짝 부족했지만 그래도 챙기셨어요.","수면 시간이 평균 정도였어요."])
+      : pick(["수면이 많이 부족했어요, 오늘 밤은 좀 더 일찍 주무셔보세요.","잠이 부족하면 다음날 컨디션에 영향이 커요."]),
+    exercise: (cardio, strength) => {
+      const total = (cardio||0)+(strength||0);
+      if(total>=60) return pick(["운동량이 정말 알찼어요!","오늘 운동 제대로 챙기셨네요, 멋져요."]);
+      if(total>0) return pick(["짧게라도 움직이신 게 좋아요.","적은 시간이라도 운동을 챙기신 점 좋아요."]);
+      return pick(["오늘은 운동을 못 챙기셨네요, 내일은 가볍게라도 움직여봐요.","운동 시간이 없었어요, 짧은 산책부터 시작해볼까요?"]);
+    },
+    mood: v => ({
+      '좋음': pick(["기분이 좋으셨다니 저도 덩달아 기분이 좋네요!","좋은 컨디션 잘 유지해봐요."]),
+      '괜찮음': pick(["무난하게 잘 보내신 하루였네요.","괜찮은 하루였다니 다행이에요."]),
+      '그저그럼': pick(["그저 그런 하루였어도 잘 버텨내셨어요.","평범한 하루도 충분히 의미 있어요."]),
+      '힘듦': pick(["힘든 하루를 보내셨군요, 오늘은 스스로를 좀 더 다독여주세요.","힘들었던 만큼 푹 쉬는 것도 필요해요."])
+    }[v] || ""),
+    diet: v => ({
+      '잘 챙김': pick(["식사도 잘 챙기셨네요, 좋아요!","끼니 잘 챙기신 점 칭찬해드리고 싶어요."]),
+      '보통': pick(["식사는 평범하게 챙기셨네요.","끼니는 그럭저럭 챙기셨어요."]),
+      '부실': pick(["오늘은 식사가 좀 부실했네요, 다음 끼니는 든든하게 챙겨봐요.","끼니를 잘 못 챙기셨어요, 내일은 신경 써봐요."])
+    }[v] || ""),
+    meditation: v => v>=15 ? pick(["명상 시간 충분히 가지셨네요, 마음이 한결 편안하셨겠어요."])
+      : pick(["짧게라도 명상하신 점 좋아요."]),
+    reading: v => v>=20 ? pick(["독서 시간도 잘 챙기셨네요!"]) : pick(["짧게라도 책 보신 점 좋아요."]),
+    screentime: v => v<=3 ? pick(["스크린타임도 잘 관리하셨어요."]) : v<=6 ? pick(["스크린타임은 보통 수준이었어요."])
+      : pick(["스크린타임이 좀 길었어요, 화면에서 눈을 떼는 시간을 가져보면 좋을 것 같아요."]),
+  };
+
+  const SUGGESTIONS = {
+    water: "내일은 물을 한두 잔 더 챙겨 마셔보는 건 어때요?",
+    sleep: "오늘은 평소보다 30분만 일찍 잠자리에 들어보세요.",
+    exercise: "내일은 10분짜리 가벼운 산책부터 시작해보는 건 어때요?",
+    diet: "다음 끼니는 채소나 단백질을 한 가지 더 추가해보세요.",
+    screentime: "잠들기 1시간 전엔 화면을 잠깐 멀리 해보는 걸 추천해요.",
+    meditation: "내일은 5분만 더 명상 시간을 늘려보세요.",
+    reading: "자기 전 10분만 책을 펼쳐보는 건 어때요?",
+    mood: "오늘 기분을 일기로 한 줄 남겨두면 패턴을 보기 좋아요."
+  };
+
+  function generateLocalFeedback(entry){
+    const lines = [];
+    let weakestKey = null, weakestScore = 1;
+
+    if('water' in entry){ lines.push(ITEM_COMMENTS.water(entry.water)); if(entry.water<4 && 0.3<weakestScore){weakestScore=0.3; weakestKey='water';} }
+    if('sleep' in entry){ lines.push(ITEM_COMMENTS.sleep(entry.sleep)); if(entry.sleep<5 && 0.2<weakestScore){weakestScore=0.2; weakestKey='sleep';} }
+    if('cardio' in entry || 'strength' in entry){
+      lines.push(ITEM_COMMENTS.exercise(entry.cardio, entry.strength));
+      const total=(entry.cardio||0)+(entry.strength||0);
+      if(total===0 && 0.1<weakestScore){weakestScore=0.1; weakestKey='exercise';}
+      if(entry.strengthDetail) lines.push(`${entry.strengthDetail} 챙기신 것도 멋졌어요.`);
+    }
+    if('mood' in entry){ lines.push(ITEM_COMMENTS.mood(entry.mood)); }
+    if('diet' in entry){
+      lines.push(ITEM_COMMENTS.diet(entry.diet));
+      if(entry.diet==='부실' && 0.25<weakestScore){weakestScore=0.25; weakestKey='diet';}
+    }
+    if('meditation' in entry) lines.push(ITEM_COMMENTS.meditation(entry.meditation));
+    if('reading' in entry) lines.push(ITEM_COMMENTS.reading(entry.reading));
+    if('screentime' in entry){
+      lines.push(ITEM_COMMENTS.screentime(entry.screentime));
+      if(entry.screentime>8 && 0.35<weakestScore){weakestScore=0.35; weakestKey='screentime';}
+    }
+
+    const chosen = lines.filter(Boolean);
+    // keep feedback to ~3 lines for readability
+    const sample = chosen.length<=3 ? chosen : [chosen[0], chosen[Math.floor(chosen.length/2)], chosen[chosen.length-1]];
+    const feedback = `${pick(OPENERS)} ${sample.join(' ')} ${pick(CLOSERS)}`;
+    const suggestion = weakestKey ? SUGGESTIONS[weakestKey] : pick(Object.values(SUGGESTIONS));
+    return { feedback, suggestion };
+  }
+
+  // ===== Local coach call (no external API needed) =====
+  const submitBtn = document.getElementById('submitBtn');
+  const btnText = document.getElementById('btnText');
+
+  submitBtn.onclick = async () => {
+    const entry = gatherEntry();
+    const note = document.getElementById('note').value.trim();
+
+    submitBtn.disabled = true;
+    btnText.innerHTML = '<span class="spinner"></span> 분석 중...';
+    setAgentStatus('thinking');
+    addTypingBubble();
+
+    const today = new Date();
+    const shortDate = `${today.getMonth()+1}/${today.getDate()}`;
+
+    try{
+      // small delay so the "생각 중..." state feels natural — purely cosmetic, no network call
+      await new Promise(res => setTimeout(res, 500 + Math.random()*500));
+
+      const parsed = generateLocalFeedback(entry);
+
+      removeTypingBubble();
+      addAgentMessage(
+        parsed.feedback || "오늘도 기록해주셔서 감사해요. 작은 변화가 쌓이고 있어요.",
+        parsed.suggestion || ""
+      );
+      setAgentStatus('idle');
+
+      entry.shortDate = shortDate;
+      entry.date = today.toISOString();
+      entry.score = computeScore(entry);
+      // normalize detail keys (strengthDetail already matches formatEntryLine usage)
+      history.push(entry);
+      renderCalendar();
+      renderSummary();
+      renderGoals();
+      checkAlerts(entry);
+      saveState();
+
+    }catch(err){
+      removeTypingBubble();
+      addAgentMessage("코치 메시지를 만드는 데 문제가 생겼어요. 잠시 후 다시 시도해주세요.", "");
+      setAgentStatus('error');
+      console.error(err);
+    } finally {
+      submitBtn.disabled = false;
+      btnText.innerHTML = '✦ AI 코치에게 피드백 받기';
+    }
+  };
+</script>
+</body>
+</html>
